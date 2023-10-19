@@ -1,0 +1,3 @@
+[submodule "CALE/cpp_CALE"]
+	path = CALE/cpp_CALE
+	url = https://github.com/HenryDayHall/cpp_CALE
