@@ -21,6 +21,9 @@
 
 #include "CALE.hh"
 
+// My includes
+#include "cpp_CALE/CALE/cluster.hxx"
+
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
 namespace contrib{
@@ -28,8 +31,7 @@ namespace contrib{
 
 // constructor 
 CALEPlugin::CALEPlugin(const double& sigma, const double& cutoff, const int& n_rounds):
-  m_sigma(sigma), m_cutoff(cutoff), m_n_rounds(n_rounds),
-  m_algorithm(sigma, cutoff, n_rounds){};
+  m_sigma(sigma), m_cutoff(cutoff), m_n_rounds(n_rounds){};
 
 
 std::string CALEPlugin::description() const{
@@ -40,37 +42,39 @@ std::string CALEPlugin::description() const{
 };
 
 
-void CALEPlugin::run_clustering(ClusterSequence &cs) const{
-  m_cs = &cs;  // update the cluster sequence
+void CALEPlugin::run_clustering(ClusterSequence &current) const{
+  Cluster algorithm(m_sigma, m_cutoff, m_n_rounds);
+
   std::vector<int> labels;
   std::vector<double> energies, pts, rapidities, phis;
-  for ( const auto jet : cs.jets() ){
+  for ( const auto jet : current.jets() ){
     labels.push_back(jet.cluster_hist_index());
     energies.push_back(jet.e());
     pts.push_back(jet.pt());
     rapidities.push_back(jet.rapidity());
     phis.push_back(jet.phi());
   }
-  m_algorithm.SetInputs(labels, energies, pts, rapidities, phis);
-  m_algorithm.DoAllMerges();
-  std::vector<std::vector<int>> jet_constituents = m_algorithm.GetJetConstituents();
+  algorithm.SetInputs(labels, energies, pts, rapidities, phis);
+  algorithm.DoAllMerges();
+  std::vector<std::vector<int>> jet_constituents = algorithm.GetJetConstituents();
   for (std::vector<int> this_jet : jet_constituents){
     // These objects are all in one jet
-    MakeJet(this_jet);
+    MakeJet(current, this_jet);
   }
 };
 
-int CALEPlugin::MakeJet(const std::vector<int> &cluster_hist_indices){
+int CALEPlugin::MakeJet(ClusterSequence &current,
+                        const std::vector<int> &cluster_hist_indices) const {
   double distance = -1.;  // We don't have real distances to record.
   int n_leaves = cluster_hist_indices.size();
   int last_index_created = cluster_hist_indices[0];
   int next_index;
   for (int leaf_n=1; leaf_n<n_leaves; leaf_n++){
-    m_cs.plugin_record_ij_recombination(last_index_created, cluster_hist_indices[leaf_n], distance, next_index);
+    current.plugin_record_ij_recombination(last_index_created, cluster_hist_indices[leaf_n], distance, next_index);
     last_index_created = next_index;
   }
-  m_cs.plugin_record_iB_recombination(last_index_created, distance);
-  return 0;
+  current.plugin_record_iB_recombination(last_index_created, distance);
+  return last_index_created;
 };
 
 } // namespace contrib

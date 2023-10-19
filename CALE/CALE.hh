@@ -24,9 +24,8 @@
 #define __FASTJET_CONTRIB_CALE_HH__
 
 #include <fastjet/internal/base.hh>
-
-// My includes
-#include "cpp_CALE/CALE/cluster.hxx"
+#include <fastjet/JetDefinition.hh>
+#include <fastjet/ClusterSequence.hh>
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
@@ -55,23 +54,18 @@ public:
   /// Exclusive jets are currently the only option going.
   /// Though, in principle, inclusive clustering would be possible
   /// with the same aproach.
-  virtual bool exclusive_sequence_meaningful() const {return true};
+  virtual bool exclusive_sequence_meaningful() const {return true;};
 
 private:
 
-  /// Algorithm is implemented in a seperate class
-  /// which we wrap here
-  Cluster m_algorithm;
   /// Algorithm parameters
   double m_sigma;
   double m_cutoff;
   int m_n_rounds;
-  /// The current cluster sequence
-  ClusterSequence m_current;
   /// Function to merge a set of particle into a jet (given the cluster history index)
   /// \param cluster_hist_indices the indices of the leaf particles of the jet
   /// \return the cluster history index of the jet
-  int MakeJet(const std::vector<int> &cluster_hist_indices);
+  int MakeJet(ClusterSequence &current, const std::vector<int> &cluster_hist_indices) const;
 };
 
 
