@@ -33,6 +33,11 @@
 
 using namespace std;
 using namespace fastjet;
+using namespace contrib;
+
+void print_jets (const fastjet::ClusterSequence &,
+                 const vector<fastjet::PseudoJet> &);
+
 
 // forward declaration to make things clearer
 void read_event(vector<PseudoJet> &event);
@@ -48,7 +53,28 @@ int main(){
 
   //----------------------------------------------------------
   // illustrate how this CALE contrib works
+  // defining parameters
+  double sigma = 0.1;
+  double cutoff = 0.0;
+  int n_rounds = 15;
+  
+  CALEPlugin jet_pluginCALE(sigma, cutoff, n_rounds);
+  fastjet::JetDefinition jet_def(&jet_pluginCALE);
+  fastjet::ClusterSequence clust_seq(event, jet_def);
+  
+  // tell the user what was done
+  cout << "# Ran " << jet_def.description() << endl;
 
+  // extract the inclusive jets with pt > 5 GeV
+  double ptmin = 5.0;
+  vector<fastjet::PseudoJet> inclusive_jets = clust_seq.inclusive_jets(ptmin);
+  
+  // print them out
+  cout << "Printing inclusive jets with pt > "<< ptmin <<" GeV\n";
+  cout << "---------------------------------------\n";
+  print_jets(clust_seq, inclusive_jets);
+  cout << endl;
+  
   return 0;
 }
 
@@ -67,5 +93,26 @@ void read_event(vector<PseudoJet> &event){
 
     // push event onto back of full_event vector
     event.push_back(particle);
+  }
+}
+
+//----------------------------------------------------------------------
+/// a function that pretty prints a list of jets
+void print_jets (const fastjet::ClusterSequence & clust_seq,
+                 const vector<fastjet::PseudoJet> & jets) {
+  
+  // sort jets into increasing pt
+  vector<fastjet::PseudoJet> sorted_jets = sorted_by_pt(jets);
+  
+  // label the columns
+  printf("%5s %10s %10s %10s %10s %10s %10s\n","jet #", "rapidity",
+         "phi", "pt","m","e", "n constituents");
+  
+  // print out the details for each jet
+  for (unsigned int i = 0; i < sorted_jets.size(); i++) {
+    int n_constituents = clust_seq.constituents(sorted_jets[i]).size();
+    printf("%5u %10.3f %10.3f %10.3f %10.3f %10.3f %8u\n",
+           i, sorted_jets[i].rap(), sorted_jets[i].phi(),
+           sorted_jets[i].perp(),sorted_jets[i].m(),sorted_jets[i].e(), n_constituents);
   }
 }

@@ -15,9 +15,9 @@ check_script = ../utils/check.sh
 #------------------------------------------------------------------------
 # things that are specific to this contrib
 NAME=CALE
-SRCS=CALE.cc
+SRCS=CALE.cc cluster.cc functions.cc
 EXAMPLES=example
-INSTALLED_HEADERS=CALE.hh
+INSTALLED_HEADERS=CALE.hh cluster.hh functions.hh
 #------------------------------------------------------------------------
 
 CXXFLAGS+= $(shell $(FASTJETCONFIG) --cxxflags)

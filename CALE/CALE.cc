@@ -22,7 +22,7 @@
 #include "CALE.hh"
 
 // My includes
-#include "cpp_CALE/CALE/cluster.hxx"
+#include "cluster.hh"
 
 FASTJET_BEGIN_NAMESPACE      // defined in fastjet/internal/base.hh
 
