@@ -1,0 +1,11 @@
+# Chebyshev Approximated Laplacian Eigenvector jets
+
+Primary repo is [cpp_CALE](https://github.com/HenryDayHall/cpp_CALE).
+Tested and also implemented in python [here](https://github.com/HenryDayHall/spectraljet).
+
+To do a quick test in this repo;
+```
+make
+make example
+./example < ../data/single-event.dat
+```
